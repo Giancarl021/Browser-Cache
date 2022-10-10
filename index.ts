@@ -6,8 +6,15 @@ import Options from './src/interfaces/Options';
 
 import constants from './src/util/constants';
 
-export = function (options: Partial<Options>) {
-    const opt = fill(options, constants.defaultOptions, true) as Options;
+const defaultOptions = { ...constants.defaultOptions, storageEngine: constants.defaultStorageEngine };
+
+export = function (options: Partial<Options> = defaultOptions) {
+    const _options = { ...options };
+    delete _options['storageEngine'];
+
+    const opt = fill(_options, constants.defaultOptions, true) as Options;
+
+    opt.storageEngine = options.storageEngine || constants.defaultStorageEngine;
 
     if (opt.checkPeriod !== null && opt.checkPeriod > 0) {
         setInterval(() => {
@@ -23,7 +30,7 @@ export = function (options: Partial<Options>) {
     }
 
     function has(key: string): boolean {
-        const item = opt.storageEngine.getItem(key);
+        const item = opt.storageEngine.getItem(key) ?? null;
 
         // Item does not exist in the opt.storageEngine
         if (item === null) return false;
@@ -69,7 +76,9 @@ export = function (options: Partial<Options>) {
     function set<T = unknown>(key: string, value: T, ttl: Nullable<number> = opt.defaultTtl): void {
         let expiresOn: Nullable<Date>;
 
-        if (ttl) {
+        if (ttl === 0) return;
+
+        if (ttl !== null) {
             expiresOn = new Date();
             expiresOn.setSeconds(expiresOn.getSeconds() + ttl);
         } else {

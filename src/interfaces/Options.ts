@@ -1,7 +1,7 @@
 import Nullable from './Nullable';
 
 interface Options {
-    defaultTtl: number;
+    defaultTtl: Nullable<number>;
     checkPeriod: Nullable<number>;
     storageEngine: Storage;
 }
