@@ -1,0 +1,16 @@
+{
+  "name": "@giancarl021/browser-cache",
+  "version": "0.1.0",
+  "description": "Simple caching service for frontend applications",
+  "main": "lib/index.js",
+  "repository": "https://github.com/Giancarl021/Browser-Cache.git",
+  "author": "Giancarlo Fontela da Luz <gian.f.luz@hotmail.com>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "fill-object": "^0.1.2"
+  }
+}
