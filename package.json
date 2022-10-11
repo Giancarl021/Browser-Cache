@@ -12,7 +12,6 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "yarn test && yarn build",
     "test": "jest",
     "ci": "yarn --frozen-lockfile"
   },
