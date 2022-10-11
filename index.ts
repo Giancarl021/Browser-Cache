@@ -1,6 +1,6 @@
 import fill from 'fill-object';
 
-import CacheItem from './src/interfaces/CacheItem';
+import CacheItem, { StoredCacheItem, UnparsedCacheItem } from './src/interfaces/CacheItem';
 import Nullable from './src/interfaces/Nullable';
 import Options from './src/interfaces/Options';
 
@@ -23,7 +23,7 @@ export = function (options: Partial<Options> = defaultOptions) {
     function fullCheck() {
         for (let i = 0; i < opt.storageEngine.length; i++) {
             const key = opt.storageEngine.key(i)!;
-            has(key);
+            const x = has(key);
         }
     }
 
@@ -37,10 +37,11 @@ export = function (options: Partial<Options> = defaultOptions) {
         // Item does not exist in the opt.storageEngine
         if (item === null) return false;
 
-        let parsed: CacheItem<unknown>;
+        let parsed: UnparsedCacheItem;
 
         try {
-            parsed = JSON.parse(item);
+            parsed = JSON.parse(item) as UnparsedCacheItem;
+            parsed.expiresOn = new Date(parsed.expiresOn as string);
 
             if (typeof parsed !== 'object' || !parsed.hasOwnProperty('value') || !parsed.hasOwnProperty('expiresOn'))
                 throw new Error('Invalid item');
@@ -64,7 +65,7 @@ export = function (options: Partial<Options> = defaultOptions) {
 
         const item = opt.storageEngine.getItem(key)!;
 
-        let parsed: CacheItem<T>;
+        let parsed: StoredCacheItem<T>;
 
         try {
             parsed = JSON.parse(item);
@@ -92,7 +93,16 @@ export = function (options: Partial<Options> = defaultOptions) {
             expiresOn
         };
 
-        opt.storageEngine.setItem(key, JSON.stringify(item));
+        const serializedItem: StoredCacheItem<T> = {
+            value,
+            expiresOn: expiresOn?.toISOString() ?? null 
+        };
+
+        const serializedString = JSON.stringify(serializedItem) as string;
+
+        console.log(key, serializedString);
+
+        opt.storageEngine.setItem(key, serializedString);
     }
 
     return {
