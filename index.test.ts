@@ -2,8 +2,8 @@ import { test, expect, jest, beforeEach } from '@jest/globals';
 
 import LocalCache from './index';
 
-const key = 'foo';
-const value = 'bar';
+const KEY = 'foo';
+const VALUE = 'bar';
 
 const wait = (seconds: number) =>
     new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -25,6 +25,7 @@ const setupSpy = () => {
 };
 
 beforeEach(() => {
+    localStorage.clear();
     jest.clearAllMocks();
 });
 
@@ -41,17 +42,17 @@ test('localStorage should exist as a global', () => {
 test('LocalCache should be able to save and retrieve an item', () => {
     const cache = LocalCache();
 
-    expect(cache.has(key)).toBe(false);
+    expect(cache.has(KEY)).toBe(false);
 
-    cache.set(key, value);
+    cache.set(KEY, VALUE);
 
-    expect(cache.has(key)).toBe(true);
-    expect(cache.get(key)).toBe(value);
+    expect(cache.has(KEY)).toBe(true);
+    expect(cache.get(KEY)).toBe(VALUE);
 
-    cache.expire(key);
+    cache.expire(KEY);
 
-    expect(cache.has(key)).toBe(false);
-    expect(() => cache.get(key)).toThrow();
+    expect(cache.has(KEY)).toBe(false);
+    expect(() => cache.get(KEY)).toThrow();
 
     expect(spy.clear).toHaveBeenCalledTimes(0);
     expect(spy.setItem).toHaveBeenCalledTimes(1);
@@ -64,12 +65,12 @@ test('LocalCache should not be able to get an expired item by the default TTL se
         defaultTtl: 0
     });
 
-    expect(cache.has(key)).toBe(false);
+    expect(cache.has(KEY)).toBe(false);
 
-    cache.set(key, value);
+    cache.set(KEY, VALUE);
 
-    expect(() => cache.get(key)).toThrow();
-    expect(cache.has(key)).toBe(false);
+    expect(() => cache.get(KEY)).toThrow();
+    expect(cache.has(KEY)).toBe(false);
 
     expect(spy.clear).toHaveBeenCalledTimes(0);
     expect(spy.setItem).toHaveBeenCalledTimes(0);
@@ -80,17 +81,40 @@ test('LocalCache should not be able to get an expired item by the default TTL se
 test('LocalCache should not be able to get an expired item by a custom TTL set to 0', () => {
     const cache = LocalCache();
 
-    expect(cache.has(key)).toBe(false);
+    expect(cache.has(KEY)).toBe(false);
 
-    cache.set(key, value, 0);
+    cache.set(KEY, VALUE, 0);
 
-    expect(() => cache.get(key)).toThrow();
-    expect(cache.has(key)).toBe(false);
+    expect(() => cache.get(KEY)).toThrow();
+    expect(cache.has(KEY)).toBe(false);
 
     expect(spy.clear).toHaveBeenCalledTimes(0);
     expect(spy.setItem).toHaveBeenCalledTimes(0);
     expect(spy.removeItem).toHaveBeenCalledTimes(0);
     expect(spy.getItem).toHaveBeenCalledTimes(3);
+});
+
+test('LocalCache should not be able to get an expired item', async () => {
+    const sec = 1;
+    const cache = LocalCache();
+
+    expect(cache.has(KEY)).toBe(false);
+
+    cache.set(KEY, VALUE, sec);
+
+    expect(cache.get(KEY)).toBe(VALUE);
+
+    expect(cache.has(KEY)).toBe(true);
+
+    await wait(sec * 2);
+
+    expect(() => cache.get(KEY)).toThrow();
+    expect(cache.has(KEY)).toBe(false);
+
+    expect(spy.clear).toHaveBeenCalledTimes(0);
+    expect(spy.setItem).toHaveBeenCalledTimes(1);
+    expect(spy.removeItem).toHaveBeenCalledTimes(1);
+    expect(spy.getItem).toHaveBeenCalledTimes(6);
 });
 
 test('LocalCache should not be able to get an expired item by a periodic check', async () => {
@@ -100,17 +124,17 @@ test('LocalCache should not be able to get an expired item by a periodic check',
         defaultTtl: sec
     });
 
-    expect(cache.has(key)).toBe(false);
+    expect(cache.has(KEY)).toBe(false);
 
-    cache.set(key, value);
+    cache.set(KEY, VALUE);
 
-    expect(cache.get(key)).toBe(value);
-    expect(cache.has(key)).toBe(true);
+    expect(cache.get(KEY)).toBe(VALUE);
+    expect(cache.has(KEY)).toBe(true);
 
     await wait(sec * 2);
 
-    expect(() => cache.get(key)).toThrow();
-    expect(cache.has(key)).toBe(false);
+    expect(() => cache.get(KEY)).toThrow();
+    expect(cache.has(KEY)).toBe(false);
 
     expect(spy.clear).toHaveBeenCalledTimes(0);
     expect(spy.setItem).toHaveBeenCalledTimes(1);

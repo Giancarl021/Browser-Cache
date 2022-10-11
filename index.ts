@@ -1,12 +1,18 @@
 import fill from 'fill-object';
 
-import CacheItem, { StoredCacheItem, UnparsedCacheItem } from './src/interfaces/CacheItem';
+import CacheItem, {
+    StoredCacheItem,
+    UnparsedCacheItem
+} from './src/interfaces/CacheItem';
 import Nullable from './src/interfaces/Nullable';
 import Options from './src/interfaces/Options';
 
 import constants from './src/util/constants';
 
-const defaultOptions = { ...constants.defaultOptions, storageEngine: constants.defaultStorageEngine };
+const defaultOptions = {
+    ...constants.defaultOptions,
+    storageEngine: constants.defaultStorageEngine
+};
 
 export = function (options: Partial<Options> = defaultOptions) {
     const _options = { ...options };
@@ -23,7 +29,6 @@ export = function (options: Partial<Options> = defaultOptions) {
     function fullCheck() {
         for (let i = 0; i < opt.storageEngine.length; i++) {
             const key = opt.storageEngine.key(i)!;
-            const x = has(key);
         }
     }
 
@@ -41,10 +46,18 @@ export = function (options: Partial<Options> = defaultOptions) {
 
         try {
             parsed = JSON.parse(item) as UnparsedCacheItem;
-            parsed.expiresOn = new Date(parsed.expiresOn as string);
 
-            if (typeof parsed !== 'object' || !parsed.hasOwnProperty('value') || !parsed.hasOwnProperty('expiresOn'))
+            if (
+                typeof parsed !== 'object' ||
+                !parsed.hasOwnProperty('value') ||
+                !parsed.hasOwnProperty('expiresOn')
+            )
                 throw new Error('Invalid item');
+
+            parsed.expiresOn =
+                typeof parsed.expiresOn === 'string'
+                    ? new Date(parsed.expiresOn)
+                    : null;
         } catch {
             // Item is not a valid JSON string
             return false;
@@ -76,7 +89,11 @@ export = function (options: Partial<Options> = defaultOptions) {
         return parsed.value;
     }
 
-    function set<T = unknown>(key: string, value: T, ttl: Nullable<number> = opt.defaultTtl): void {
+    function set<T = unknown>(
+        key: string,
+        value: T,
+        ttl: Nullable<number> = opt.defaultTtl
+    ): void {
         let expiresOn: Nullable<Date>;
 
         if (ttl === 0) return;
@@ -95,12 +112,10 @@ export = function (options: Partial<Options> = defaultOptions) {
 
         const serializedItem: StoredCacheItem<T> = {
             value,
-            expiresOn: expiresOn?.toISOString() ?? null 
+            expiresOn: item.expiresOn?.toISOString() ?? null
         };
 
         const serializedString = JSON.stringify(serializedItem) as string;
-
-        console.log(key, serializedString);
 
         opt.storageEngine.setItem(key, serializedString);
     }
@@ -111,4 +126,4 @@ export = function (options: Partial<Options> = defaultOptions) {
         get,
         set
     };
-}
+};
