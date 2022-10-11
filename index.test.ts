@@ -1,6 +1,6 @@
 import { test, expect, jest, beforeEach } from '@jest/globals';
 
-import LocalCache from './index';
+import BrowserCache from './index';
 
 const KEY = 'foo';
 const VALUE = 'bar';
@@ -39,8 +39,8 @@ test('localStorage should exist as a global', () => {
     expect(localStorage).toHaveProperty('clear');
 });
 
-test('LocalCache should be able to save and retrieve an item', () => {
-    const cache = LocalCache();
+test('BrowserCache should be able to save and retrieve an item', () => {
+    const cache = BrowserCache();
 
     expect(cache.has(KEY)).toBe(false);
 
@@ -60,8 +60,8 @@ test('LocalCache should be able to save and retrieve an item', () => {
     expect(spy.getItem).toHaveBeenCalledTimes(6);
 });
 
-test('LocalCache should not be able to get an expired item by the default TTL set to 0', () => {
-    const cache = LocalCache({
+test('BrowserCache should not be able to get an expired item by the default TTL set to 0', () => {
+    const cache = BrowserCache({
         defaultTtl: 0
     });
 
@@ -78,8 +78,8 @@ test('LocalCache should not be able to get an expired item by the default TTL se
     expect(spy.getItem).toHaveBeenCalledTimes(3);
 });
 
-test('LocalCache should not be able to get an expired item by a custom TTL set to 0', () => {
-    const cache = LocalCache();
+test('BrowserCache should not be able to get an expired item by a custom TTL set to 0', () => {
+    const cache = BrowserCache();
 
     expect(cache.has(KEY)).toBe(false);
 
@@ -94,9 +94,9 @@ test('LocalCache should not be able to get an expired item by a custom TTL set t
     expect(spy.getItem).toHaveBeenCalledTimes(3);
 });
 
-test('LocalCache should not be able to get an expired item', async () => {
+test('BrowserCache should not be able to get an expired item', async () => {
     const sec = 1;
-    const cache = LocalCache();
+    const cache = BrowserCache();
 
     expect(cache.has(KEY)).toBe(false);
 
@@ -117,9 +117,9 @@ test('LocalCache should not be able to get an expired item', async () => {
     expect(spy.getItem).toHaveBeenCalledTimes(6);
 });
 
-test('LocalCache should not be able to get an expired item by a periodic check', async () => {
+test('BrowserCache should not be able to get an expired item by a periodic check', async () => {
     const sec = 1;
-    const cache = LocalCache({
+    const cache = BrowserCache({
         checkPeriod: sec / 2,
         defaultTtl: sec
     });
