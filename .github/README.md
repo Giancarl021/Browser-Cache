@@ -38,7 +38,7 @@ import BrowserCache from '@giancarl021/browser-cache';
 The imported `BrowserCache` function is used to create a new instance of the cache service. It accepts an `options` parameter.
 
 ```js
-const cache = new BrowserCache(options);
+const cache = BrowserCache(options);
 ```
 
 The `options` parameter is a `Partial<...>` with the following properties:
