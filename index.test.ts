@@ -5,8 +5,8 @@ import LocalCache from './index';
 const key = 'foo';
 const value = 'bar';
 
-const wait = (millis: number) =>
-    new Promise((resolve) => setTimeout(resolve, millis));
+const wait = (seconds: number) =>
+    new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 const setupSpy = () => {
     const proto = Object.getPrototypeOf(localStorage);
@@ -96,10 +96,10 @@ test('LocalCache should not be able to get an expired item by a custom TTL set t
 });
 
 test('LocalCache should not be able to get an expired item by a periodic check', async () => {
-    const ms = 200;
+    const sec = 1200;
     const cache = LocalCache({
-        checkPeriod: ms,
-        defaultTtl: ms
+        checkPeriod: sec,
+        defaultTtl: sec
     });
 
     expect(cache.has(key)).toBe(false);
@@ -109,7 +109,7 @@ test('LocalCache should not be able to get an expired item by a periodic check',
     expect(cache.get(key)).toBe(value);
     expect(cache.has(key)).toBe(false);
 
-    await wait(ms);
+    await wait(sec);
 
     expect(() => cache.get(key)).toThrow();
     expect(cache.has(key)).toBe(false);

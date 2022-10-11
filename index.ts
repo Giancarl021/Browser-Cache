@@ -17,12 +17,14 @@ export = function (options: Partial<Options> = defaultOptions) {
     opt.storageEngine = options.storageEngine || constants.defaultStorageEngine;
 
     if (opt.checkPeriod !== null && opt.checkPeriod > 0) {
-        setInterval(() => {
-            for (let i = 0; i < opt.storageEngine.length; i++) {
-                const key = opt.storageEngine.key(i)!;
-                has(key);
-            }
-        }, opt.checkPeriod);
+        setInterval(fullCheck, opt.checkPeriod * 1000);
+    }
+
+    function fullCheck() {
+        for (let i = 0; i < opt.storageEngine.length; i++) {
+            const key = opt.storageEngine.key(i)!;
+            has(key);
+        }
     }
 
     function expire(key: string): void {
