@@ -62,7 +62,7 @@ interface BrowserCacheOptions {
 * `set`: Sets a new item in the cache.
     * `key (string)`: The key of the item;
     * `value (T)`: The value of the item;
-    * `ttl (number | null)`: The time-to-live of the item.Defaults to `options.defaultTtl`;
+    * `ttl (number | null)`: The time-to-live of the item in **seconds**. Defaults to `options.defaultTtl`;
     * [*Typescript only*] `T (unknown)`: The type of the item to be set, defaults to `unknown`.
 
     Signature:
