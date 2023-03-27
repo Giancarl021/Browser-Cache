@@ -29,6 +29,7 @@ export = function (options: Partial<Options> = defaultOptions) {
     function fullCheck() {
         for (let i = 0; i < opt.storageEngine.length; i++) {
             const key = opt.storageEngine.key(i)!;
+            has(key);
         }
     }
 
