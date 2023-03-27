@@ -73,7 +73,7 @@ export = function (options: Partial<Options> = defaultOptions) {
 
         if (parsed.expiresOn && Number(parsed.expiresOn) < Date.now()) {
             // Item already expired
-            expire(contextKey);
+            _expire(contextKey);
             return false;
         }
 
