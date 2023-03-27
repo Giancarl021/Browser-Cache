@@ -98,3 +98,5 @@ interface BrowserCacheOptions {
     ```ts
     function expire(key: string): void
     ```
+
+* `close`:
