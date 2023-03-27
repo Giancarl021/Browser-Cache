@@ -9,7 +9,7 @@ import Options from './src/interfaces/Options';
 
 import constants from './src/util/constants';
 
-const defaultOptions = {
+const defaultOptions: Options = {
     ...constants.defaultOptions,
     storageEngine: constants.defaultStorageEngine
 };
@@ -17,27 +17,35 @@ const defaultOptions = {
 export = function (options: Partial<Options> = defaultOptions) {
     const _options = { ...options };
     delete _options['storageEngine'];
+    let checkInterval: NodeJS.Timer;
 
     const opt = fill(_options, constants.defaultOptions, true) as Options;
 
     opt.storageEngine = options.storageEngine || constants.defaultStorageEngine;
 
     if (opt.checkPeriod !== null && opt.checkPeriod > 0) {
-        setInterval(fullCheck, opt.checkPeriod * 1000);
+        checkInterval = setInterval(_fullCheck, opt.checkPeriod * 1000);
     }
 
-    function fullCheck() {
+    function _fullCheck(clear: boolean = false) {
+        const fn = clear ? _expire : _has;
+
         for (let i = 0; i < opt.storageEngine.length; i++) {
             const key = opt.storageEngine.key(i)!;
+            if (key.startsWith(opt.keyPrefix)) fn(key);
         }
     }
 
-    function expire(key: string): void {
-        opt.storageEngine.removeItem(key);
+    function _getContextKey(key: string) {
+        return opt.keyPrefix + key;
     }
 
-    function has(key: string): boolean {
-        const item = opt.storageEngine.getItem(key) ?? null;
+    function _expire(contextKey: string) {
+        opt.storageEngine.removeItem(contextKey);
+    }
+
+    function _has(contextKey: string) {
+        const item = opt.storageEngine.getItem(contextKey) ?? null;
 
         // Item does not exist in the opt.storageEngine
         if (item === null) return false;
@@ -65,7 +73,7 @@ export = function (options: Partial<Options> = defaultOptions) {
 
         if (parsed.expiresOn && Number(parsed.expiresOn) < Date.now()) {
             // Item already expired
-            expire(key);
+            _expire(contextKey);
             return false;
         }
 
@@ -73,10 +81,23 @@ export = function (options: Partial<Options> = defaultOptions) {
         return true;
     }
 
-    function get<T = unknown>(key: string): T {
-        if (!has(key)) throw new Error(`Item with key "${key}" does not exist`);
+    function expire(key: string): void {
+        const _key = _getContextKey(key);
+        _expire(_key);
+    }
 
-        const item = opt.storageEngine.getItem(key)!;
+    function has(key: string): boolean {
+        const _key = _getContextKey(key);
+        return _has(_key);
+    }
+
+    function get<T = unknown>(key: string): T {
+        const _key = _getContextKey(key);
+
+        if (!_has(_key))
+            throw new Error(`Item with key "${key}" does not exist`);
+
+        const item = opt.storageEngine.getItem(_key)!;
 
         let parsed: StoredCacheItem<T>;
 
@@ -117,13 +138,21 @@ export = function (options: Partial<Options> = defaultOptions) {
 
         const serializedString = JSON.stringify(serializedItem) as string;
 
-        opt.storageEngine.setItem(key, serializedString);
+        const _key = _getContextKey(key);
+
+        opt.storageEngine.setItem(_key, serializedString);
+    }
+
+    function close() {
+        clearInterval(checkInterval);
+        _fullCheck(true);
     }
 
     return {
         expire,
         has,
         get,
-        set
+        set,
+        close
     };
 };
