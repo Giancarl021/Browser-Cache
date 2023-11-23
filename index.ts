@@ -144,7 +144,7 @@ export = function (options: Partial<Options> = defaultOptions) {
     }
 
     function close() {
-        clearInterval(checkInterval);
+        clearInterval((checkInterval as unknown) as number);
         _fullCheck(true);
     }
 
